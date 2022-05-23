@@ -1,0 +1,56 @@
+version: "3.3"
+services:
+  falcon-mysql:
+    container_name: falcon-mysql
+    volumes:
+      - falcon-mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=YOUR_DB_PASSWD
+    ports:
+      - 3306:3306
+    image: mysql:5.7
+
+  falcon-redis:
+    container_name: falcon-redis
+    ports:
+      - 6379:6379
+    image: redis:4-alpine3.8
+
+  falcon-plus:
+    container_name: falcon-plus
+    ports:
+      - 6030:6030  # Heartbeat
+      - 8433:8433  # Report
+      - 8080:8080  # API
+    environment:
+      - 'MYSQL_PORT=root:YOUR_DB_PASSWD@tcp\(falcon-mysql:3306\)'
+      - "REDIS_PORT=falcon-redis:6379"
+    volumes:
+      - /home/work/open-falcon/data:/open-falcon/data
+      - /home/work/open-falcon/logs:/open-falcon/logs
+    image: openfalcon/falcon-plus:v0.3
+    command: sh -c "(sleep 10; ./ctrl.sh start graph hbs judge transfer nodata aggregator gateway api alarm;) & 2>1; /usr/bin/supervisord -c /etc/supervisord.conf"
+    # Or including agent if you want
+    # command: sh -c "(sleep 10; ./ctrl.sh start all;) & 2>1; /usr/bin/supervisord -c /etc/supervisord.conf"
+
+  falcon-dashboard:
+    container_name: falcon-dashboard
+    ports:
+      - "8081:8081"
+    environment:
+      - API_ADDR=http://falcon-plus:8080/api/v1
+      - PORTAL_DB_HOST=falcon-mysql
+      - PORTAL_DB_PORT=3306
+      - PORTAL_DB_USER=root
+      - PORTAL_DB_PASS=YOUR_DB_PASSWD
+      - PORTAL_DB_NAME=falcon_portal
+      - ALARM_DB_HOST=falcon-mysql
+      - ALARM_DB_PORT=3306
+      - ALARM_DB_USER=root
+      - ALARM_DB_PASS=YOUR_DB_PASSWD
+      - ALARM_DB_NAME=alarms
+    image: openfalcon/falcon-dashboard:v0.2.1
+    entrypoint: ["./control", "startfg"]
+
+volumes:
+  falcon-mysql-data:

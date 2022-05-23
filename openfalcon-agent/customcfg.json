@@ -1,0 +1,34 @@
+{
+  "debug": true,
+  "hostname": "",
+  "ip": "",
+  "plugin": {
+    "enabled": false,
+    "dir": "./plugin",
+    "git": "https://github.com/open-falcon/plugin.git",
+    "logs": "./logs"
+  },
+  "heartbeat": {
+    "enabled": true,
+    "addr": "falcon.heartbeat:59000",
+    "interval": 60,
+    "timeout": 1000
+  },
+  "transfer": {
+    "enabled": true,
+    "addrs": ["falcon.transfer:59001"],
+    "interval": 60,
+    "timeout": 1000
+  },
+  "http": {
+    "enabled": true,
+    "listen": ":1988",
+    "backdoor": false
+  },
+  "collector": {
+    "ifacePrefix": ["eth", "em", "en"],
+    "mountPoint": []
+  },
+  "default_tags": {},
+  "ignore": {}
+}

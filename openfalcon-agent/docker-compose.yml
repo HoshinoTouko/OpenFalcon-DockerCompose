@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+  agent:
+    image: hoshinotouko/falcon-agent:v0.3
+    hostname: YourHostName
+    restart: always
+    container_name: falcon-agent
+    environment:
+      - NUX_ROOTFS=/rootfs
+    volumes:
+      - /:/rootfs:ro
+    extra_hosts:
+      - falcon.heartbeat:IPADDR
+      - falcon.transfer:IPADDR
+    command: sh -c "(sleep 10; ./agent/bin/falcon-agent -c /open-falcon/agent/config/customcfg.json;) & 2>1; /usr/bin/supervisord -c /etc/supervisord.conf"
